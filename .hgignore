@@ -1,0 +1,21 @@
+syntax: glob
+*.cmi
+*.cmx
+*.cmo
+*.cma
+*.cmxa
+*.o
+*.so
+*.a
+\#*\#
+*.top
+*.d
+*.di
+
+syntax: regexp
+\.DS_Store$
+\._d$
+\._bcdi$
+\._ncdi$
+doc\\*
+

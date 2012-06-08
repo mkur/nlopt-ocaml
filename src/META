@@ -1,0 +1,5 @@
+# Specifications for nlopt
+requires = ""
+version = "0.9"
+archive(byte) = "nlopt.cma"
+archive(native) = "nlopt.cmxa"
