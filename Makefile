@@ -12,3 +12,5 @@ clean:
 	$(MAKE) -C src clean
 	$(MAKE) -C examples clean
 
+doc:
+	$(MAKE) -C src doc

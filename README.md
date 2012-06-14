@@ -1,6 +1,6 @@
 # nlopt-ocaml
 
-nlopt-ocaml implements OCaml binding to the [NLOpt](http://ab-initio.mit.edu/wiki/index.php/NLopt) optimization library. 
+nlopt-ocaml implements OCaml bindings to the [NLOpt](http://ab-initio.mit.edu/wiki/index.php/NLopt) optimization library. 
 
 ## Dependencies
 
@@ -46,7 +46,7 @@ The interface closely matches the object-oriented [API](http://ab-initio.mit.edu
 	
 	let x0 = [| 5.;  5.|];;
 	
-	let (res, xopt, xfopt) = optimize opt x0;;
+	let (res, xopt, fopt) = optimize opt x0;;
 	
 
 
