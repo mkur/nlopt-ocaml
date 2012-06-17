@@ -76,6 +76,7 @@ val set_upper_bounds : t -> float array -> unit
 val get_upper_bounds : t -> float array 
 
 val add_inequality_constraint: t -> (float array -> (float array) option -> float) -> float -> unit
+val add_equality_constraint: t -> (float array -> (float array) option -> float) -> float -> unit
   
 val set_stopval: t -> float -> unit
 val get_stopval: t -> float 

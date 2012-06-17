@@ -373,6 +373,39 @@ value ml_nlopt_add_inequality_constraint(value ml_opt, value ml_constr, value ml
     CAMLreturn(Val_int(map_nlopt_result(res)));
 }
 
+
+value ml_nlopt_add_equality_constraint(value ml_opt, value ml_constr, value ml_tol)
+{
+    CAMLparam3(ml_opt, ml_constr, ml_tol);
+    CAMLlocal1(cons);
+
+    nlopt_opt opt = (nlopt_opt) Field(ml_opt, 1);
+    
+    value *constraints = (value *) Field(ml_opt, 3);
+
+    value *cb = (value *) malloc(sizeof(value)); // callback container
+
+    *cb = ml_constr;
+
+    nlopt_result res = nlopt_add_equality_constraint(opt, &ml_nlopt_callback_wrapper, (void *) cb, Double_val(ml_tol));
+
+    if (res == NLOPT_SUCCESS) 
+    {
+	caml_register_global_root(cb);
+
+	cons = caml_alloc(2, 0);
+
+	Store_field(cons, 0, (value) cb);     /* Head */
+	Store_field(cons, 1, *constraints);   /* Tail */
+	
+	*constraints = cons;
+    }
+    else
+	free(cb);
+    
+    CAMLreturn(Val_int(map_nlopt_result(res)));
+}
+
 /* Stopping criteria */
 
 value ml_nlopt_set_stopval(value ml_opt, value stopval)

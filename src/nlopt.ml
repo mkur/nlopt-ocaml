@@ -147,6 +147,11 @@ let add_inequality_constraint opt fconstr tol =
   let _ = check_result (ml_add_inequality_constraint opt fconstr tol) in ()
 ;;
 
+external ml_add_equality_constraint: t -> (float array -> (float array) option -> float) -> float -> result = "ml_nlopt_add_equality_constraint"
+let add_equality_constraint opt fconstr tol =
+  let _ = check_result (ml_add_equality_constraint opt fconstr tol) in ()
+;;
+
 (* Stopping criteria *)
 
 external ml_set_stopval: t -> float -> result = "ml_nlopt_set_stopval"
