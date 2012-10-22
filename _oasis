@@ -1,0 +1,32 @@
+OASISFormat:		0.3
+Name:			nlopt
+Version:		0.4
+Synopsis:		nlopt-ocaml implements OCaml bindings to the NLOpt optimization library.
+Authors:		Michał Kurcewicz <michal.kurcewicz@gmail.com>
+Maintainers:		Michał Kurcewicz <michal.kurcewicz@gmail.com>
+License:		LGPL-2.1+ with OCaml linking exception
+Homepage:		https://bitbucket.org/mkur/nlopt-ocaml
+BuildTools:		ocamlbuild
+
+Plugins:		META (0.3), DevFiles(0.3)
+
+Library nlopt
+        Path:		src
+        Modules:	Nlopt
+        Csources:	nlopt_wrapper.c
+        CCopt:		-std=c99 -O3 -Wall
+        CCLib:		-lnlopt
+
+
+Executable rosenbrock
+        Path:		examples
+        MainIs:		rosenbrock.ml
+        BuildDepends:	nlopt
+        Install:	false
+        CompiledObject:	native
+
+
+
+
+
+

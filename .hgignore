@@ -11,6 +11,8 @@ syntax: glob
 *.top
 *.d
 *.di
+*.native
+*.byte
 
 syntax: regexp
 \.DS_Store$
@@ -18,4 +20,13 @@ syntax: regexp
 \._bcdi$
 \._ncdi$
 doc\\*
+^_build$
+^setup\.data$
+^setup\.log$
+^src/libnlopt_stubs\.clib
+^src/nlopt\.mllib
 
+	
+
+
+	

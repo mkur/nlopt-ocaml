@@ -1,5 +1,12 @@
-# Specifications for nlopt
-requires = ""
-version = "0.9"
+# OASIS_START
+# DO NOT EDIT (digest: 21d14a71cd8c2fc4ab952041438436aa)
+version = "0.4"
+description =
+"nlopt-ocaml implements OCaml bindings to the NLOpt optimization library."
 archive(byte) = "nlopt.cma"
+archive(byte, plugin) = "nlopt.cma"
 archive(native) = "nlopt.cmxa"
+archive(native, plugin) = "nlopt.cmxs"
+exists_if = "nlopt.cma"
+# OASIS_STOP
+
