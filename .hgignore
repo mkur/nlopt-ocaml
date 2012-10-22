@@ -23,8 +23,7 @@ doc\\*
 ^_build$
 ^setup\.data$
 ^setup\.log$
-^src/libnlopt_stubs\.clib
-^src/nlopt\.mllib
+
 
 	
 
