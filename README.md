@@ -14,11 +14,14 @@ Use Mercurial to get the newest sources:
 
 	hg clone https://mkur@bitbucket.org/mkur/nlopt-ocaml
 
-Edit `Makefile.conf` to reflect your system settings. You need to provide paths to the NLopt library (`LIBDIRS`) and its include files (`INCDIRS`). Then type
+In the main directory type
 
+	./configure
+	make 
 	make install
 	
-to install nlopt-ocaml using findlib.
+	
+to build and install nlopt-ocaml using ocamlbuild and findlib.
 
 ## Example
 
