@@ -8,7 +8,29 @@ nlopt-ocaml implements OCaml bindings to the [NLOpt](http://ab-initio.mit.edu/wi
 * findlib
 * NLopt 
 
-## Installing
+## Installation
+
+### Mac OS X
+
+Use [homebrew](http://mxcl.github.com/homebrew/) to install nlopt:
+
+	brew install nlopt
+	
+Use [OPAM](http://opam.ocamlpro.com) to install the OCaml interface:
+
+	opam install nlopt-ocaml
+
+### Ubuntu (12.10)
+
+Install nlopt:
+
+	sudo apt-get install libnlopt0 libnlopt-dev
+	
+Use [OPAM](http://opam.ocamlpro.com) to install the OCaml interface:
+
+	opam install nlopt-ocaml
+
+### Generic installation instructions
 
 Use Mercurial to get the newest sources:
 
