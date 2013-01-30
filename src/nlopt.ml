@@ -60,15 +60,12 @@ type result =
   | NLOPT_MAXEVAL_REACHED 
   | NLOPT_MAXTIME_REACHED
       
-exception Failure
-exception Invalid_args
-exception Out_of_memory
 exception Roundoff_limited
 exception Forced_stop
 
 let check_result = function
-    NLOPT_FAILURE -> raise Failure
-  | NLOPT_INVALID_ARGS -> raise Invalid_args
+    NLOPT_FAILURE -> raise (Failure "NLOPT_FAILURE")
+  | NLOPT_INVALID_ARGS -> raise (Invalid_argument "NLOPT_INVALID_ARGS")
   | NLOPT_OUT_OF_MEMORY -> raise Out_of_memory
   | NLOPT_ROUNDOFF_LIMITED -> raise Roundoff_limited
   | NLOPT_FORCED_STOP -> raise Forced_stop
@@ -106,7 +103,7 @@ external ml_optimize : t -> float array -> (result * float array * float) = "ml_
 
 let optimize opt x =
   if get_dimension opt <> Array.length x then
-    raise Invalid_args
+    raise (Invalid_argument "Nlopt.optimize: dimension of initial guess different from algorithm dimension")
   else
     let (result, xopt, fopt) = ml_optimize opt x in
       (check_result result, xopt, fopt)
@@ -117,7 +114,7 @@ let optimize opt x =
 external ml_set_lower_bounds: t -> float array -> result = "ml_nlopt_set_lower_bounds"
 let set_lower_bounds opt lb = 
   if get_dimension opt <> Array.length lb then
-    raise Invalid_args
+    raise (Invalid_argument "Nlopt.set_lower_bounds: dimension of bounds different from algorithm dimension")
   else
     let _ = check_result (ml_set_lower_bounds opt lb) in ()
 
@@ -131,7 +128,7 @@ let get_lower_bounds opt =
 external ml_set_upper_bounds: t -> float array -> result = "ml_nlopt_set_upper_bounds"
 let set_upper_bounds opt ub = 
   if get_dimension opt <> Array.length ub then
-    raise Invalid_args 
+    raise (Invalid_argument "Nlopt.set_upper_bounds: dimension of bounds different from algorithm dimension")
   else
     let _ = check_result (ml_set_upper_bounds opt ub) in ()
 
@@ -204,14 +201,14 @@ let set_local_optimizer opt local_opt =
 external ml_set_initial_step: t -> float array -> result = "ml_nlopt_set_initial_step" 
 let set_initial_step opt dx = 
   if get_dimension opt <> Array.length dx then
-    raise Invalid_args
+    raise (Invalid_argument "Nlopt.set_initial_step: dimension of initial step different from algorithm dimension")
   else
     let _ = check_result (ml_set_initial_step opt dx) in ();;
 
 external ml_get_initial_step: t -> float array -> float array -> result = "ml_nlopt_get_initial_step"
 let get_initial_step opt x = 
   if get_dimension opt <> Array.length x then
-    raise Invalid_args
+    raise (Invalid_argument "Nlopt.get_initial_step: dimension of initial step different from algorithm dimension") 
   else
     let dx = Array.create (get_dimension opt) nan in
     let _ = check_result (ml_get_initial_step opt x dx) in dx
@@ -222,7 +219,7 @@ let get_initial_step opt x =
 external ml_set_population: t -> int -> result = "ml_nlopt_set_population"
 let set_population opt pop = 
   if pop < 0 then
-    raise Invalid_args 
+    raise (Invalid_argument "Nlopt.set_population: population negative")
   else
     let _ = check_result (ml_set_population opt pop) in ()
 ;;
@@ -232,7 +229,7 @@ let set_population opt pop =
 external ml_set_vector_storage: t -> int -> result = "ml_nlopt_set_vector_storage"
 let set_vector_storage opt m = 
   if m < 0 then
-    raise Invalid_args 
+    raise (Invalid_argument "Nlopt.set_vector_storage: number of stored vectors negative")
   else
     let _ = check_result (ml_set_vector_storage opt m) in ()
 ;;

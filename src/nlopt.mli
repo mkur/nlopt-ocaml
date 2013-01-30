@@ -56,9 +56,6 @@ type result =
   | NLOPT_MAXEVAL_REACHED
   | NLOPT_MAXTIME_REACHED
 
-exception Failure
-exception Invalid_args
-exception Out_of_memory
 exception Roundoff_limited
 exception Forced_stop
 
