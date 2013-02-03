@@ -38,17 +38,17 @@ val slsqp : [`Local | `Grad | `Ineq | `Eq] algorithm
 type 'a t
 
 type result =
-  NLOPT_FAILURE
-| NLOPT_INVALID_ARGS
-| NLOPT_OUT_OF_MEMORY
-| NLOPT_ROUNDOFF_LIMITED
-| NLOPT_FORCED_STOP
-| NLOPT_SUCCESS
-| NLOPT_STOPVAL_REACHED
-| NLOPT_FTOL_REACHED
-| NLOPT_XTOL_REACHED
-| NLOPT_MAXEVAL_REACHED
-| NLOPT_MAXTIME_REACHED
+| Failure_res
+| Invalid_args_res
+| Out_of_memory_res
+| Roundoff_limited_res
+| Forced_stop_res
+| Success
+| Stopval_reached
+| Ftol_reached
+| Xtol_reached
+| Maxeval_reached
+| Maxtime_reached
 
 exception Roundoff_limited
 exception Forced_stop
