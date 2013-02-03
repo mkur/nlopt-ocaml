@@ -15,7 +15,7 @@ let rosenbrock a grad =
 
 let f = rosenbrock;;
 
-let opt = create NLOPT_LD_MMA 2;; 
+let opt = create mma 2;; 
 
 (* let opt = create NLOPT_LN_COBYLA 2;; *)
 
