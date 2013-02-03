@@ -1,112 +1,106 @@
 
-type t
-type algorithm =
-    NLOPT_GN_DIRECT
-  | NLOPT_GN_DIRECT_L
-  | NLOPT_GN_DIRECT_L_RAND
-  | NLOPT_GN_DIRECT_NOSCAL
-  | NLOPT_GN_DIRECT_L_NOSCAL
-  | NLOPT_GN_DIRECT_L_RAND_NOSCAL
-  | NLOPT_GN_ORIG_DIRECT
-  | NLOPT_GN_ORIG_DIRECT_L
-  | NLOPT_GD_STOGO
-  | NLOPT_GD_STOGO_RAND
-  | NLOPT_LD_LBFGS_NOCEDAL
-  | NLOPT_LD_LBFGS
-  | NLOPT_LN_PRAXIS
-  | NLOPT_LD_VAR1
-  | NLOPT_LD_VAR2
-  | NLOPT_LD_TNEWTON
-  | NLOPT_LD_TNEWTON_RESTART
-  | NLOPT_LD_TNEWTON_PRECOND
-  | NLOPT_LD_TNEWTON_PRECOND_RESTART
-  | NLOPT_GN_CRS2_LM
-  | NLOPT_GN_MLSL
-  | NLOPT_GD_MLSL
-  | NLOPT_GN_MLSL_LDS
-  | NLOPT_GD_MLSL_LDS
-  | NLOPT_LD_MMA
-  | NLOPT_LN_COBYLA
-  | NLOPT_LN_NEWUOA
-  | NLOPT_LN_NEWUOA_BOUND
-  | NLOPT_LN_NELDERMEAD
-  | NLOPT_LN_SBPLX
-  | NLOPT_LN_AUGLAG
-  | NLOPT_LD_AUGLAG
-  | NLOPT_LN_AUGLAG_EQ
-  | NLOPT_LD_AUGLAG_EQ
-  | NLOPT_LN_BOBYQA
-  | NLOPT_GN_ISRES
-  | NLOPT_AUGLAG
-  | NLOPT_AUGLAG_EQ
-  | NLOPT_G_MLSL
-  | NLOPT_G_MLSL_LDS
-  | NLOPT_LD_SLSQP
+type 'a algorithm
+
+val direct : [`Global ] algorithm
+val direct_l : [`Global | `Ineq] algorithm
+val direct_l_rand : [`Global] algorithm
+val direct_noscal : [`Global] algorithm
+val direct_l_noscal : [`Global] algorithm
+val direct_l_rand_noscal : [`Global] algorithm
+val orig_direct : [`Global | `Ineq] algorithm
+val orig_direct_l : [`Global] algorithm
+val stogo : [`Global | `Grad] algorithm
+val stogo_rand : [`Global | `Grad] algorithm
+val lbfgs_nocedal : [`Local | `Grad] algorithm
+val lbfgs : [`Local | `Grad] algorithm
+val praxis : [`Local] algorithm
+val var1 : [`Local | `Grad] algorithm
+val var2 : [`Local | `Grad] algorithm
+val tnewton : [`Local | `Grad] algorithm
+val tnewton_restart : [`Local | `Grad] algorithm
+val tnewton_precond : [`Local | `Grad] algorithm
+val tnewton_precond_restart : [`Local | `Grad] algorithm
+val crs2_lm : [`Global] algorithm
+val mma  : [`Local | `Grad | `Ineq] algorithm
+val cobyla : [`Local | `Ineq | `Eq] algorithm
+val newuoa : [`Local] algorithm
+val newuoa_bound : [`Local] algorithm
+val neldermead : [`Local] algorithm
+val sbplx : [`Local] algorithm
+val bobyqa : [`Local] algorithm
+val isres : [`Global | `Ineq | `Eq] algorithm
+val auglag : [`Subsidiary | `Ineq | `Eq] algorithm
+val auglag_eq : [`Subsidiary | `Ineq | `Eq] algorithm
+val mlsl : [`Subsidiary | `Global] algorithm
+val mlsl_lds : [`Subsidiary | `Global] algorithm
+val slsqp : [`Local | `Grad | `Ineq | `Eq] algorithm
+
+type 'a t
 
 type result =
-    NLOPT_FAILURE
-  | NLOPT_INVALID_ARGS
-  | NLOPT_OUT_OF_MEMORY
-  | NLOPT_ROUNDOFF_LIMITED
-  | NLOPT_FORCED_STOP
-  | NLOPT_SUCCESS
-  | NLOPT_STOPVAL_REACHED
-  | NLOPT_FTOL_REACHED
-  | NLOPT_XTOL_REACHED
-  | NLOPT_MAXEVAL_REACHED
-  | NLOPT_MAXTIME_REACHED
+  NLOPT_FAILURE
+| NLOPT_INVALID_ARGS
+| NLOPT_OUT_OF_MEMORY
+| NLOPT_ROUNDOFF_LIMITED
+| NLOPT_FORCED_STOP
+| NLOPT_SUCCESS
+| NLOPT_STOPVAL_REACHED
+| NLOPT_FTOL_REACHED
+| NLOPT_XTOL_REACHED
+| NLOPT_MAXEVAL_REACHED
+| NLOPT_MAXTIME_REACHED
 
 exception Roundoff_limited
 exception Forced_stop
 
-val create : algorithm -> int -> t
+val create : 'a algorithm -> int -> 'a t
 
-val set_min_objective : t -> (float array -> (float array option) -> float) -> unit
-val set_max_objective : t -> (float array -> (float array option) -> float) -> unit
-val optimize : t -> float array -> (result * float array * float) 
+val set_min_objective : 'a t -> (float array -> (float array option) -> float) -> unit
+val set_max_objective : 'a t -> (float array -> (float array option) -> float) -> unit
+val optimize : 'a t -> float array -> (result * float array * float) 
 
-val get_dimension : t -> int
+val get_dimension : 'a t -> int
 
-val set_lower_bounds : t -> float array -> unit
-val get_lower_bounds : t -> float array 
-val set_upper_bounds : t -> float array -> unit
-val get_upper_bounds : t -> float array 
+val set_lower_bounds : 'a t -> float array -> unit
+val get_lower_bounds : 'a t -> float array 
+val set_upper_bounds : 'a t -> float array -> unit
+val get_upper_bounds : 'a t -> float array 
 
-val add_inequality_constraint: t -> (float array -> (float array) option -> float) -> float -> unit
-val add_equality_constraint: t -> (float array -> (float array) option -> float) -> float -> unit
+val add_inequality_constraint: [>`Ineq] t -> (float array -> (float array) option -> float) -> float -> unit
+val add_equality_constraint: [>`Eq] t -> (float array -> (float array) option -> float) -> float -> unit
   
-val set_stopval: t -> float -> unit
-val get_stopval: t -> float 
+val set_stopval: 'a t -> float -> unit
+val get_stopval: 'a t -> float 
 
-val set_ftol_rel: t -> float -> unit
-val get_ftol_rel: t -> float 
+val set_ftol_rel: 'a t -> float -> unit
+val get_ftol_rel: 'a t -> float 
 
-val set_ftol_abs: t -> float -> unit
-val get_ftol_abs: t -> float
+val set_ftol_abs: 'a t -> float -> unit
+val get_ftol_abs: 'a t -> float
   
-val set_xtol_rel: t -> float -> unit
-val get_xtol_rel: t -> float 
+val set_xtol_rel: 'a t -> float -> unit
+val get_xtol_rel: 'a t -> float 
   
-val set_xtol_abs: t -> float array -> unit
-val get_xtol_abs: t -> float array 
+val set_xtol_abs: 'a t -> float array -> unit
+val get_xtol_abs: 'a t -> float array 
 
-val set_maxeval: t -> int -> unit
-val get_maxeval: t -> int 
+val set_maxeval: 'a t -> int -> unit
+val get_maxeval: 'a t -> int 
   
-val set_maxtime: t -> float -> unit
-val get_maxtime: t -> float 
+val set_maxtime: 'a t -> float -> unit
+val get_maxtime: 'a t -> float 
 
-val force_stop: t -> unit
+val force_stop: 'a t -> unit
 
-val set_local_optimizer: t -> t -> unit
+val set_local_optimizer: [>`Subsidiary] t -> 'a t -> unit
 
-val set_initial_step: t -> float array -> unit
-val get_initial_step: t -> float array -> float array
+val set_initial_step: 'a t -> float array -> unit
+val get_initial_step: 'a t -> float array -> float array
 
-val set_population: t -> int -> unit
+val set_population: 'a t -> int -> unit
 
-val set_vector_storage: t -> int -> unit
-val get_vector_storage: t -> int
+val set_vector_storage: 'a t -> int -> unit
+val get_vector_storage: 'a t -> int
 
 val version: unit -> int * int * int
 
