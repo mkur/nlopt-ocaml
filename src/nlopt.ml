@@ -81,42 +81,42 @@ let slsqp = NLOPT_LD_SLSQP
 type 'a t
 
 type result = 
-  | NLOPT_FAILURE
-  | NLOPT_INVALID_ARGS
-  | NLOPT_OUT_OF_MEMORY
-  | NLOPT_ROUNDOFF_LIMITED
-  | NLOPT_FORCED_STOP
-  | NLOPT_SUCCESS
-  | NLOPT_STOPVAL_REACHED
-  | NLOPT_FTOL_REACHED
-  | NLOPT_XTOL_REACHED 
-  | NLOPT_MAXEVAL_REACHED 
-  | NLOPT_MAXTIME_REACHED
-      
+| Failure_res
+| Invalid_args_res
+| Out_of_memory_res
+| Roundoff_limited_res
+| Forced_stop_res
+| Success
+| Stopval_reached
+| Ftol_reached
+| Xtol_reached
+| Maxeval_reached
+| Maxtime_reached
+    
 exception Roundoff_limited
 exception Forced_stop
 
 let check_result = function
-    NLOPT_FAILURE -> raise (Failure "NLOPT_FAILURE")
-  | NLOPT_INVALID_ARGS -> raise (Invalid_argument "NLOPT_INVALID_ARGS")
-  | NLOPT_OUT_OF_MEMORY -> raise Out_of_memory
-  | NLOPT_ROUNDOFF_LIMITED -> raise Roundoff_limited
-  | NLOPT_FORCED_STOP -> raise Forced_stop
+  | Failure_res -> raise (Failure "NLOPT_FAILURE")
+  | Invalid_args_res -> raise (Invalid_argument "NLOPT_INVALID_ARGS")
+  | Out_of_memory_res -> raise Out_of_memory
+  | Roundoff_limited_res -> raise Roundoff_limited
+  | Forced_stop_res -> raise Forced_stop
   | x -> x
 ;;
 
 let string_of_result = function 
-    NLOPT_FAILURE -> "NLOPT_FAILURE"
-  | NLOPT_INVALID_ARGS -> "NLOPT_INVALID_ARGS"
-  | NLOPT_OUT_OF_MEMORY -> "NLOPT_OUT_OF_MEMORY"
-  | NLOPT_ROUNDOFF_LIMITED -> "NLOPT_ROUNDOFF_LIMITED"
-  | NLOPT_FORCED_STOP -> "NLOPT_FORCED_STOP"
-  | NLOPT_SUCCESS -> "NLOPT_SUCCESS"
-  | NLOPT_STOPVAL_REACHED -> "NLOPT_STOPVAL_REACHED"
-  | NLOPT_FTOL_REACHED -> "NLOPT_FTOL_REACHED"
-  | NLOPT_XTOL_REACHED -> "NLOPT_XTOL_REACHED"
-  | NLOPT_MAXEVAL_REACHED -> "NLOPT_MAXEVAL_REACHED"
-  | NLOPT_MAXTIME_REACHED -> "NLOPT_MAXTIME_REACHED"
+  | Failure_res -> "NLOPT_FAILURE"
+  | Invalid_args_res -> "NLOPT_INVALID_ARGS"
+  | Out_of_memory_res -> "NLOPT_OUT_OF_MEMORY"
+  | Roundoff_limited_res -> "NLOPT_ROUNDOFF_LIMITED"
+  | Forced_stop_res -> "NLOPT_FORCED_STOP"
+  | Success -> "NLOPT_SUCCESS"
+  | Stopval_reached -> "NLOPT_STOPVAL_REACHED"
+  | Ftol_reached -> "NLOPT_FTOL_REACHED"
+  | Xtol_reached -> "NLOPT_XTOL_REACHED"
+  | Maxeval_reached -> "NLOPT_MAXEVAL_REACHED"
+  | Maxtime_reached -> "NLOPT_MAXTIME_REACHED"
 ;;
 
 external create: 'a algorithm -> int -> 'a t = "ml_nlopt_create"
