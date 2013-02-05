@@ -1,5 +1,5 @@
 # OASIS_START
-# DO NOT EDIT (digest: db35a77b26957c32d41132099b39cf6f)
+# DO NOT EDIT (digest: 0d7b9a85340e2281d55a467b023e0b4d)
 # Ignore VCS directories, you can use the same kind of rule outside 
 # OASIS_START/STOP if you want to exclude directories that contains 
 # useless stuff for the build process
@@ -25,5 +25,7 @@
 <src/nlopt.{cma,cmxa}>: use_libnlopt_stubs
 # Executable rosenbrock
 "examples/rosenbrock.native": use_nlopt
+# Executable tutorial
+"examples/tutorial.native": use_nlopt
 <examples/*.ml{,i}>: use_nlopt
 # OASIS_STOP
