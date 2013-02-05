@@ -34,7 +34,7 @@ Use [OPAM](http://opam.ocamlpro.com) to install the OCaml interface:
 
 Use Mercurial to get the newest sources:
 
-	hg clone https://mkur@bitbucket.org/mkur/nlopt-ocaml
+	hg clone https://bitbucket.org/mkur/nlopt-ocaml
 
 In the main directory type
 
