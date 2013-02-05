@@ -25,6 +25,13 @@ Executable rosenbrock
         Install:	false
         CompiledObject:	native
 
+Executable tutorial
+        Path:		examples
+        MainIs:		tutorial.ml
+        BuildDepends:	nlopt
+        Install:	false
+        CompiledObject:	native
+
 
 
 
