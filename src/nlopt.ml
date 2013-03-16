@@ -102,21 +102,21 @@ let check_result = function
   | Out_of_memory_res -> raise Out_of_memory
   | Roundoff_limited_res -> raise Roundoff_limited
   | Forced_stop_res -> raise Forced_stop
-  | x -> x
+  | Success -> `Success
+  | Stopval_reached -> `Stopval_reached
+  | Ftol_reached -> `Ftol_reached
+  | Xtol_reached -> `Xtol_reached
+  | Maxeval_reached -> `Maxeval_reached
+  | Maxtime_reached -> `Maxtime_reached
 ;;
 
 let string_of_result = function 
-  | Failure_res -> "NLOPT_FAILURE"
-  | Invalid_args_res -> "NLOPT_INVALID_ARGS"
-  | Out_of_memory_res -> "NLOPT_OUT_OF_MEMORY"
-  | Roundoff_limited_res -> "NLOPT_ROUNDOFF_LIMITED"
-  | Forced_stop_res -> "NLOPT_FORCED_STOP"
-  | Success -> "NLOPT_SUCCESS"
-  | Stopval_reached -> "NLOPT_STOPVAL_REACHED"
-  | Ftol_reached -> "NLOPT_FTOL_REACHED"
-  | Xtol_reached -> "NLOPT_XTOL_REACHED"
-  | Maxeval_reached -> "NLOPT_MAXEVAL_REACHED"
-  | Maxtime_reached -> "NLOPT_MAXTIME_REACHED"
+  | `Success -> "NLOPT_SUCCESS"
+  | `Stopval_reached -> "NLOPT_STOPVAL_REACHED"
+  | `Ftol_reached -> "NLOPT_FTOL_REACHED"
+  | `Xtol_reached -> "NLOPT_XTOL_REACHED"
+  | `Maxeval_reached -> "NLOPT_MAXEVAL_REACHED"
+  | `Maxtime_reached -> "NLOPT_MAXTIME_REACHED"
 ;;
 
 external create: 'a algorithm -> int -> 'a t = "ml_nlopt_create"
