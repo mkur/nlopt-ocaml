@@ -17,7 +17,6 @@ Library nlopt
         CCopt:		-std=c99 -O3 -Wall
         CCLib:		-lnlopt
 
-
 Executable rosenbrock
         Path:		examples
         MainIs:		rosenbrock.ml
@@ -32,8 +31,13 @@ Executable tutorial
         Install:	false
         CompiledObject:	native
 
-
-
+Document nlopt
+         Title:			API reference for NLOpt
+         Type:			OCamlbuild(0.3)
+         BuildTools:		ocamldoc
+         InstallDir:		$docdir
+         XOCamlbuildPath:	.
+         XOCamlbuildLibraries:	nlopt
 
 
 
