@@ -17,8 +17,6 @@ let f = rosenbrock;;
 
 let opt = create mma 2;; 
 
-(* let opt = create NLOPT_LN_COBYLA 2;; *)
-
 let () = 
   begin
     set_min_objective opt f;

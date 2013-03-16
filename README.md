@@ -51,7 +51,7 @@ The interface closely matches the object-oriented [API](http://ab-initio.mit.edu
 	
 	open Nlopt;;
 	
-	let opt = create NLOPT_LD_LBFGS 2;;
+	let opt = create lbfgs 2;;
 	
 	let f a grad = 					
 	  let x = a.(0) in
