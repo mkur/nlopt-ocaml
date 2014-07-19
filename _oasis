@@ -1,6 +1,6 @@
 OASISFormat:		0.3
 Name:			nlopt
-Version:		0.4
+Version:		0.5.1
 Synopsis:		nlopt-ocaml implements OCaml bindings to the NLOpt optimization library.
 Authors:		Michał Kurcewicz <michal.kurcewicz@gmail.com>
 Maintainers:		Michał Kurcewicz <michal.kurcewicz@gmail.com>
@@ -15,7 +15,10 @@ Library nlopt
         Modules:	Nlopt
         Csources:	nlopt_wrapper.c
         CCopt:		-std=c99 -O3 -Wall
-        CCLib:		-lnlopt
+        if system(macosx)
+               CCLib:   -lnlopt_cxx
+        else
+               CCLib:   -lnlopt
 
 Executable rosenbrock
         Path:		examples
