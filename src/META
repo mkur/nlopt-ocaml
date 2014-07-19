@@ -1,6 +1,6 @@
 # OASIS_START
-# DO NOT EDIT (digest: 21d14a71cd8c2fc4ab952041438436aa)
-version = "0.4"
+# DO NOT EDIT (digest: e0c8ad339d688fa1d28030f0cc7a389a)
+version = "0.5.1"
 description =
 "nlopt-ocaml implements OCaml bindings to the NLOpt optimization library."
 archive(byte) = "nlopt.cma"
