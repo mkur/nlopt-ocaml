@@ -1,8 +1,9 @@
 # OASIS_START
-# DO NOT EDIT (digest: c87d5117b19b660e3eb476fd14631ea5)
+# DO NOT EDIT (digest: be899ff0873b728aaecabdd43268595e)
 # Ignore VCS directories, you can use the same kind of rule outside
 # OASIS_START/STOP if you want to exclude directories that contains
 # useless stuff for the build process
+true: annot, bin_annot
 <**/.svn>: -traverse
 <**/.svn>: not_hygienic
 ".bzr": -traverse
@@ -15,7 +16,7 @@
 "_darcs": not_hygienic
 # Library nlopt
 "src/nlopt.cmxs": use_nlopt
-<src/*.ml{,i}>: oasis_library_nlopt_ccopt
+<src/*.ml{,i,y}>: oasis_library_nlopt_ccopt
 "src/nlopt_wrapper.c": oasis_library_nlopt_ccopt
 <src/nlopt.{cma,cmxa}>: oasis_library_nlopt_cclib
 "src/libnlopt_stubs.lib": oasis_library_nlopt_cclib
@@ -27,5 +28,5 @@
 "examples/rosenbrock.native": use_nlopt
 # Executable tutorial
 "examples/tutorial.native": use_nlopt
-<examples/*.ml{,i}>: use_nlopt
+<examples/*.ml{,i,y}>: use_nlopt
 # OASIS_STOP

@@ -1,4 +1,4 @@
-OASISFormat:		0.3
+OASISFormat:		0.4
 Name:			nlopt
 Version:		0.5.1
 Synopsis:		nlopt-ocaml implements OCaml bindings to the NLOpt optimization library.
@@ -8,7 +8,7 @@ License:		LGPL-2.1+ with OCaml linking exception
 Homepage:		https://bitbucket.org/mkur/nlopt-ocaml
 BuildTools:		ocamlbuild
 
-Plugins:		META (0.3), DevFiles(0.3)
+Plugins:		META (0.4), DevFiles(0.4)
 
 Library nlopt
         Path:		src
@@ -36,7 +36,7 @@ Executable tutorial
 
 Document nlopt
          Title:			API reference for NLOpt
-         Type:			OCamlbuild(0.3)
+         Type:			OCamlbuild(0.4)
          BuildTools:		ocamldoc
          InstallDir:		$docdir
          XOCamlbuildPath:	.
