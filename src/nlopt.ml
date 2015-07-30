@@ -153,7 +153,7 @@ let set_lower_bounds opt lb =
 
 external ml_get_lower_bounds: 'a t-> float array -> result = "ml_nlopt_get_lower_bounds"
 let get_lower_bounds opt = 
-  let lb = Array.create (get_dimension opt) nan in
+  let lb = Array.make (get_dimension opt) nan in
   let _ = check_result (ml_get_lower_bounds opt lb) in
     lb
 ;;
@@ -167,7 +167,7 @@ let set_upper_bounds opt ub =
 
 external ml_get_upper_bounds: 'a t-> float array -> result = "ml_nlopt_get_upper_bounds"
 let get_upper_bounds opt = 
-  let ub = Array.create (get_dimension opt) nan in
+  let ub = Array.make (get_dimension opt) nan in
   let _ = check_result (ml_get_upper_bounds opt ub) in
     ub
 ;;
@@ -204,7 +204,7 @@ external ml_set_xtol_abs: 'a t -> float array -> result = "ml_nlopt_set_xtol_abs
 let set_xtol_abs opt tol = let _ = check_result (ml_set_xtol_abs opt tol) in ();;
 external ml_get_xtol_abs: 'a t -> float array -> result = "ml_nlopt_get_xtol_abs"
 let get_xtol_abs opt = 
-  let tol = Array.create (get_dimension opt) nan in
+  let tol = Array.make (get_dimension opt) nan in
   let _ = check_result (ml_get_xtol_abs opt tol) in tol
 ;;
 
@@ -243,7 +243,7 @@ let get_initial_step opt x =
   if get_dimension opt <> Array.length x then
     raise (Invalid_argument "Nlopt.get_initial_step: dimension of initial step different from algorithm dimension") 
   else
-    let dx = Array.create (get_dimension opt) nan in
+    let dx = Array.make (get_dimension opt) nan in
     let _ = check_result (ml_get_initial_step opt x dx) in dx
 ;;
 
