@@ -1,6 +1,6 @@
 #!/bin/bash
 
-rm -f setup.date setup.log
+rm -f setup.data setup.log
 
 oasis setup
 ocaml setup.ml -configure --prefix `opam config var prefix`
