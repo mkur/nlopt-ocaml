@@ -16,7 +16,7 @@ Use [homebrew](http://mxcl.github.com/homebrew/) to install nlopt:
 
 	brew install nlopt
 	
-Use [OPAM](http://opam.ocamlpro.com) to install the OCaml interface:
+Use [OPAM](https://opam.ocaml.org/) to install the OCaml interface:
 
 	opam install nlopt-ocaml
 
@@ -26,7 +26,7 @@ Install nlopt:
 
 	sudo apt-get install libnlopt0 libnlopt-dev
 	
-Use [OPAM](http://opam.ocamlpro.com) to install the OCaml interface:
+Use [OPAM](https://opam.ocaml.org/ to install the OCaml interface:
 
 	opam install nlopt-ocaml
 
@@ -45,7 +45,7 @@ to build and install nlopt-ocaml using ocamlbuild and findlib.
 ## Example
 
 The interface closely matches the object-oriented [API](http://ab-initio.mit.edu/wiki/index.php/NLopt_Reference) of NLopt. 
-	
+
 	open Nlopt;;
 	
 	let opt = create lbfgs 2;;
