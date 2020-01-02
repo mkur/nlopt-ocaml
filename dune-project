@@ -20,13 +20,10 @@
 (package
   (name nlopt)
   (synopsis "NLopt")
-  (description "\
-DESC")
+  (description "OCaml bindings to the NLOpt optimization library")
   (depends
     (ocaml (>= 4.08))
     (dune (>= 1.10))
-    (base :build)
-    (stdio :build)
-    )
+  )
   (tags (clib:nlopt))
 )
