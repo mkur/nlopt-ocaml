@@ -5,7 +5,7 @@ nlopt-ocaml implements OCaml bindings to the [NLOpt](http://ab-initio.mit.edu/wi
 ## Dependencies
 
 * ocaml
-* findlib
+* dune
 * NLopt 
 
 ## Installation
@@ -32,17 +32,14 @@ Use [OPAM](http://opam.ocamlpro.com) to install the OCaml interface:
 
 ### Generic installation instructions
 
-Use Mercurial to get the newest sources:
+Use git to get the newest sources:
 
-	hg clone https://bitbucket.org/mkur/nlopt-ocaml
+	git clone https://github.com/mkur/nlopt-ocaml
 
 In the main directory type
 
-	./configure
 	make 
-	make install
-	
-	
+		
 to build and install nlopt-ocaml using ocamlbuild and findlib.
 
 ## Example
@@ -79,6 +76,6 @@ A more advanced example is included in the distribution.
 
 ## Documentation
 
-Please refer to the project [wiki](https://bitbucket.org/mkur/nlopt-ocaml/wiki/Home).
+
 
 
