@@ -1,5 +1,7 @@
 
-type nlopt_algorithm = 
+
+
+type [@warning "-37"] nlopt_algorithm = 
   | NLOPT_GN_DIRECT
   | NLOPT_GN_DIRECT_L
   | NLOPT_GN_DIRECT_L_RAND
@@ -80,7 +82,7 @@ let slsqp = NLOPT_LD_SLSQP
 
 type 'a t
 
-type result = 
+type [@warning "-37"] result = 
 | Failure_res
 | Invalid_args_res
 | Out_of_memory_res
@@ -96,7 +98,7 @@ type result =
 exception Roundoff_limited
 exception Forced_stop
 
-let check_result = function
+let map_result = function
   | Failure_res -> raise (Failure "NLOPT_FAILURE")
   | Invalid_args_res -> raise (Invalid_argument "NLOPT_INVALID_ARGS")
   | Out_of_memory_res -> raise Out_of_memory
@@ -124,12 +126,12 @@ external get_dimension: 'a t -> int = "ml_nlopt_get_dimension"
 
 external ml_set_min_objective : 'a t -> (float array -> (float array) option -> float) -> result = "ml_nlopt_set_min_objective"
 let set_min_objective opt f =
-  let _ = check_result (ml_set_min_objective opt f) in ()
+  let _ = map_result (ml_set_min_objective opt f) in ()
 ;;
 
 external ml_set_max_objective : 'a t -> (float array -> (float array) option -> float) -> result = "ml_nlopt_set_max_objective"
 let set_max_objective opt f =
-  let _ = check_result (ml_set_max_objective opt f) in ()
+  let _ = map_result (ml_set_max_objective opt f) in ()
 ;;
 
 external ml_optimize : 'a t -> float array -> (result * float array * float) = "ml_nlopt_optimize"
@@ -139,7 +141,7 @@ let optimize opt x =
     raise (Invalid_argument "Nlopt.optimize: dimension of initial guess different from algorithm dimension")
   else
     let (result, xopt, fopt) = ml_optimize opt x in
-      (check_result result, xopt, fopt)
+      (map_result result, xopt, fopt)
 ;;
 
 (* Constraints *)
@@ -149,12 +151,12 @@ let set_lower_bounds opt lb =
   if get_dimension opt <> Array.length lb then
     raise (Invalid_argument "Nlopt.set_lower_bounds: dimension of bounds different from algorithm dimension")
   else
-    let _ = check_result (ml_set_lower_bounds opt lb) in ()
+    let _ = map_result (ml_set_lower_bounds opt lb) in ()
 
 external ml_get_lower_bounds: 'a t-> float array -> result = "ml_nlopt_get_lower_bounds"
 let get_lower_bounds opt = 
   let lb = Array.make (get_dimension opt) nan in
-  let _ = check_result (ml_get_lower_bounds opt lb) in
+  let _ = map_result (ml_get_lower_bounds opt lb) in
     lb
 ;;
 
@@ -163,62 +165,62 @@ let set_upper_bounds opt ub =
   if get_dimension opt <> Array.length ub then
     raise (Invalid_argument "Nlopt.set_upper_bounds: dimension of bounds different from algorithm dimension")
   else
-    let _ = check_result (ml_set_upper_bounds opt ub) in ()
+    let _ = map_result (ml_set_upper_bounds opt ub) in ()
 
 external ml_get_upper_bounds: 'a t-> float array -> result = "ml_nlopt_get_upper_bounds"
 let get_upper_bounds opt = 
   let ub = Array.make (get_dimension opt) nan in
-  let _ = check_result (ml_get_upper_bounds opt ub) in
+  let _ = map_result (ml_get_upper_bounds opt ub) in
     ub
 ;;
 
 external ml_add_inequality_constraint: 'a t -> (float array -> (float array) option -> float) -> float -> result = "ml_nlopt_add_inequality_constraint"
 let add_inequality_constraint opt fconstr tol =
-  let _ = check_result (ml_add_inequality_constraint opt fconstr tol) in ()
+  let _ = map_result (ml_add_inequality_constraint opt fconstr tol) in ()
 ;;
 
 external ml_add_equality_constraint: 'a t -> (float array -> (float array) option -> float) -> float -> result = "ml_nlopt_add_equality_constraint"
 let add_equality_constraint opt fconstr tol =
-  let _ = check_result (ml_add_equality_constraint opt fconstr tol) in ()
+  let _ = map_result (ml_add_equality_constraint opt fconstr tol) in ()
 ;;
 
 (* Stopping criteria *)
 
 external ml_set_stopval: 'a t -> float -> result = "ml_nlopt_set_stopval"
-let set_stopval opt x = let _ = check_result (ml_set_stopval opt x) in ();;
+let set_stopval opt x = let _ = map_result (ml_set_stopval opt x) in ();;
 external get_stopval: 'a t -> float = "ml_nlopt_get_stopval"
 
 external ml_set_ftol_rel: 'a t -> float -> result = "ml_nlopt_set_ftol_rel"
-let set_ftol_rel opt tol = let _ = check_result (ml_set_ftol_rel opt tol) in ();;
+let set_ftol_rel opt tol = let _ = map_result (ml_set_ftol_rel opt tol) in ();;
 external get_ftol_rel: 'a t -> float = "ml_nlopt_get_ftol_rel"
 
 external ml_set_ftol_abs: 'a t -> float -> result = "ml_nlopt_set_ftol_abs"
-let set_ftol_abs opt tol = let _ = check_result (ml_set_ftol_abs opt tol) in ();;
+let set_ftol_abs opt tol = let _ = map_result (ml_set_ftol_abs opt tol) in ();;
 external get_ftol_abs: 'a t -> float = "ml_nlopt_get_ftol_abs"
 
 external ml_set_xtol_rel: 'a t -> float -> result = "ml_nlopt_set_xtol_rel"
-let set_xtol_rel opt tol = let _ = check_result (ml_set_xtol_rel opt tol) in ();;
+let set_xtol_rel opt tol = let _ = map_result (ml_set_xtol_rel opt tol) in ();;
 external get_xtol_rel: 'a t -> float = "ml_nlopt_get_xtol_rel"
 
 external ml_set_xtol_abs: 'a t -> float array -> result = "ml_nlopt_set_xtol_abs"
-let set_xtol_abs opt tol = let _ = check_result (ml_set_xtol_abs opt tol) in ();;
+let set_xtol_abs opt tol = let _ = map_result (ml_set_xtol_abs opt tol) in ();;
 external ml_get_xtol_abs: 'a t -> float array -> result = "ml_nlopt_get_xtol_abs"
 let get_xtol_abs opt = 
   let tol = Array.make (get_dimension opt) nan in
-  let _ = check_result (ml_get_xtol_abs opt tol) in tol
+  let _ = map_result (ml_get_xtol_abs opt tol) in tol
 ;;
 
 
 external ml_set_maxeval: 'a t -> int -> result = "ml_nlopt_set_maxeval"
-let set_maxeval opt n = let _ = check_result (ml_set_maxeval opt n) in ();;
+let set_maxeval opt n = let _ = map_result (ml_set_maxeval opt n) in ();;
 external get_maxeval: 'a t -> int = "ml_nlopt_get_maxeval"
 
 external ml_set_maxtime: 'a t -> float -> result = "ml_nlopt_set_maxtime"
-let set_maxtime opt t = let _ = check_result (ml_set_maxtime opt t) in ();;
+let set_maxtime opt t = let _ = map_result (ml_set_maxtime opt t) in ();;
 external get_maxtime: 'a t -> float = "ml_nlopt_get_maxtime"
 
 external ml_force_stop: 'a t -> result = "ml_nlopt_force_stop"
-let force_stop opt = let _ = check_result (ml_force_stop opt) in ();;
+let force_stop opt = let _ = map_result (ml_force_stop opt) in ();;
 
 
 
@@ -226,7 +228,7 @@ let force_stop opt = let _ = check_result (ml_force_stop opt) in ();;
 
 external ml_set_local_optimizer: [>`Subsidiary] t -> 'a t -> result = "ml_nlopt_set_local_optimizer"
 let set_local_optimizer opt local_opt = 
-  let _ = check_result (ml_set_local_optimizer opt local_opt) in ();;
+  let _ = map_result (ml_set_local_optimizer opt local_opt) in ();;
 
 
 (* Initial step size *)
@@ -236,7 +238,7 @@ let set_initial_step opt dx =
   if get_dimension opt <> Array.length dx then
     raise (Invalid_argument "Nlopt.set_initial_step: dimension of initial step different from algorithm dimension")
   else
-    let _ = check_result (ml_set_initial_step opt dx) in ();;
+    let _ = map_result (ml_set_initial_step opt dx) in ();;
 
 external ml_get_initial_step: 'a t -> float array -> float array -> result = "ml_nlopt_get_initial_step"
 let get_initial_step opt x = 
@@ -244,7 +246,7 @@ let get_initial_step opt x =
     raise (Invalid_argument "Nlopt.get_initial_step: dimension of initial step different from algorithm dimension") 
   else
     let dx = Array.make (get_dimension opt) nan in
-    let _ = check_result (ml_get_initial_step opt x dx) in dx
+    let _ = map_result (ml_get_initial_step opt x dx) in dx
 ;;
 
 (* Stochastic population *)
@@ -254,7 +256,7 @@ let set_population opt pop =
   if pop < 0 then
     raise (Invalid_argument "Nlopt.set_population: population negative")
   else
-    let _ = check_result (ml_set_population opt pop) in ()
+    let _ = map_result (ml_set_population opt pop) in ()
 ;;
 
 (* Vector storage for limited-memory quasi-Newton algorithms *)
@@ -264,7 +266,7 @@ let set_vector_storage opt m =
   if m < 0 then
     raise (Invalid_argument "Nlopt.set_vector_storage: number of stored vectors negative")
   else
-    let _ = check_result (ml_set_vector_storage opt m) in ()
+    let _ = map_result (ml_set_vector_storage opt m) in ()
 ;;
 
 external get_vector_storage: 'a t -> int = "ml_nlopt_get_vector_storage"

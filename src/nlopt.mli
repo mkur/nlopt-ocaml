@@ -96,6 +96,10 @@ val get_maxeval: 'a t -> int
 val set_maxtime: 'a t -> float -> unit
 val get_maxtime: 'a t -> float 
 
+(** {2 Force stop} *)
+
+val force_stop: 'a t -> unit
+
 (** {2 Local/subsidiary optimization algorithm} *)
 
 val set_local_optimizer: [>`Subsidiary] t -> 'a t -> unit
