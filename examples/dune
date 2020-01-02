@@ -1,0 +1,7 @@
+(executables
+  (names
+    tutorial
+    rosenbrock
+  )
+  (libraries nlopt)
+)
