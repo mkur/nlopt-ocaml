@@ -25,6 +25,7 @@ depends: [
 ]
 
 depexts: [
-  ["nlopt"]
-]
+  ["libnlopt-dev"] {os-family = "debian"}
+  ["nlopt"] {os = "macos"}
+  ]
 
