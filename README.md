@@ -2,6 +2,8 @@
 
 nlopt-ocaml implements OCaml bindings to the [NLOpt](http://ab-initio.mit.edu/wiki/index.php/NLopt) optimization library. 
 
+[![Build Status](https://travis-ci.org/mkur/nlopt-ocaml.svg?branch=master)](https://travis-ci.org/mkur/nlopt-ocaml)
+
 ## Dependencies
 
 * ocaml
@@ -40,7 +42,7 @@ In the main directory type
 
 	make 
 		
-to build and install nlopt-ocaml using ocamlbuild and findlib.
+to build and install nlopt-ocaml using dune.
 
 ## Example
 
