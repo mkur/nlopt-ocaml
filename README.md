@@ -12,7 +12,7 @@ nlopt-ocaml implements OCaml bindings to the [NLOpt](http://ab-initio.mit.edu/wi
 
 ### Mac OS X
 
-Use [homebrew](http://mxcl.github.com/homebrew/) to install nlopt:
+Use [homebrew](https://brew.sh/) to install nlopt:
 
 	brew install nlopt
 	
@@ -26,7 +26,7 @@ Install nlopt:
 
 	sudo apt-get install libnlopt0 libnlopt-dev
 	
-Use [OPAM](https://opam.ocaml.org/ to install the OCaml interface:
+Use [OPAM](https://opam.ocaml.org/) to install the OCaml interface:
 
 	opam install nlopt-ocaml
 
@@ -70,7 +70,9 @@ The interface closely matches the object-oriented [API](http://ab-initio.mit.edu
 	
 	let (res, xopt, fopt) = optimize opt x0;;
 	
+To run this optimization problem type
 
+	dune exec examples/tutorial.exe
 
 A more advanced example is included in the distribution.
 

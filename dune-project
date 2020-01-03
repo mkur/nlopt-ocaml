@@ -1,7 +1,7 @@
 (lang dune 1.10)
 (name nlopt)
 
-(generate_opam_files true)
+(generate_opam_files false)
 
 (source (github mkur/nlopt-ocaml))
 (license "LGPL-2.1+ with OCaml linking exception")
