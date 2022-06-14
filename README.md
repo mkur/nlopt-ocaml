@@ -1,4 +1,3 @@
-# nlopt-ocaml
 
 nlopt-ocaml implements OCaml bindings to the [NLOpt](http://ab-initio.mit.edu/wiki/index.php/NLopt) optimization library. 
 
@@ -18,7 +17,7 @@ Use [OPAM](https://opam.ocaml.org/) to install the OCaml interface. This will al
 
 	opam install nlopt-ocaml
 
-### Ubuntu (Bionic)
+### Ubuntu (Focal)
 
 Install nlopt:
 
