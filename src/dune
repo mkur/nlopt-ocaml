@@ -1,15 +1,5 @@
 (library
   (public_name nlopt)
-  (modules
-    nlopt
-  )
-  (c_names
-    nlopt_wrapper
-  )
-  (c_flags
-    
-  )
-  (c_library_flags
-    (-lnlopt)
-  )
-)
+  (modules nlopt)
+  (foreign_stubs (language c) (names nlopt_wrapper))
+  (c_library_flags -lnlopt))
