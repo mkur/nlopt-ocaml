@@ -1,6 +1,0 @@
-
-depexts: [
-  ["libnlopt-dev"] {os-family = "debian"}
-  ["nlopt"] {os = "macos"}
-  ]
-
