@@ -118,9 +118,10 @@ static void ml_nlopt_finalize(value ml_opt)
 
     // printf("Boom!\n");
 
-    nlopt_destroy(opt);
+    if (opt)
+            nlopt_destroy(opt);
     caml_remove_global_root(cb);
-    free(cb);
+    caml_stat_free(cb);
 
     struct constraint_list *constraints = MLOPT_VAL(ml_opt).constraints;
 
@@ -132,11 +133,11 @@ static void ml_nlopt_finalize(value ml_opt)
 	// printf("Finalize %p\n", p);
 	
 	caml_remove_global_root(p);
-	free(p);
+	caml_stat_free(p);
 
         prev = constraints;
         constraints = constraints->next;
-        free(prev);
+        caml_stat_free(prev);
     }
 }
 
@@ -156,18 +157,16 @@ value ml_nlopt_create (value algorithm, value n)
 {
     CAMLparam2(algorithm, n);
 
-    nlopt_algorithm alg = map_algorithms[Int_val(algorithm)];
-    nlopt_opt opt = nlopt_create(alg, Int_val(n));
-
-    value *cb = (value *) malloc(sizeof(value)); // callback container
-
+    value *cb = (value *) caml_stat_alloc(sizeof(value)); // callback container
     *cb = Val_unit;
-
     caml_register_global_root(cb);
 
     CAMLlocal1(ml_opt);
-
     ml_opt = caml_alloc_custom(&opt_ops, sizeof(struct ml_opt), 1, 100);
+
+    nlopt_algorithm alg = map_algorithms[Int_val(algorithm)];
+    nlopt_opt opt = nlopt_create(alg, Int_val(n));
+
     MLOPT_VAL(ml_opt).opt = opt;
     MLOPT_VAL(ml_opt).cb = cb;
     MLOPT_VAL(ml_opt).constraints = NULL;
@@ -251,18 +250,18 @@ value ml_nlopt_optimize(value ml_opt, value ml_x)
     
     int len = Wosize_val(ml_x) / Double_wosize;
     
-    double *x = (double *) malloc(len * sizeof(double));
+    ml_xopt = caml_alloc(len * Double_wosize, Double_array_tag);
+
+    double *x = (double *) caml_stat_alloc(len * sizeof(double));
     
     for(int i=0; i < len; i++)
 	x[i] = Double_field(ml_x, i);
     
     nlopt_result res = nlopt_optimize(opt, x, &fopt);
     
-    ml_xopt = caml_alloc(len * Double_wosize, Double_array_tag);
-
     for(int i=0; i < len; i++)
 	Store_double_field(ml_xopt, i, x[i]);    
-    free(x);
+    caml_stat_free(x);
     
     ml_rv = caml_alloc(3, 0);
     
@@ -288,14 +287,14 @@ value ml_nlopt_set_lower_bounds (value ml_opt, value lb)
     nlopt_result res;
 
     int len = Wosize_val(lb) / Double_wosize;
-    double *b = (double *) malloc(len * sizeof(double));
+    double *b = (double *) caml_stat_alloc(len * sizeof(double));
     
     for(int i=0; i<len; i++)
 	b[i] = Double_field(lb, i);
     
     res = nlopt_set_lower_bounds(opt, b);
 
-    free(b);
+    caml_stat_free(b);
     
     return(Val_int(map_nlopt_result(res)));
 }
@@ -308,7 +307,7 @@ value ml_nlopt_get_lower_bounds (value ml_opt, value ml_b)
     
     int n = nlopt_get_dimension(opt);
     
-    double *b = (double *) malloc(n * sizeof(double));
+    double *b = (double *) caml_stat_alloc(n * sizeof(double));
     
     res = nlopt_get_lower_bounds(opt, b);
     
@@ -318,7 +317,7 @@ value ml_nlopt_get_lower_bounds (value ml_opt, value ml_b)
 	    Store_double_field(ml_b, i, b[i]);
     }
 
-    free(b);
+    caml_stat_free(b);
     
     return(Val_int(map_nlopt_result(res)));
 }
@@ -329,14 +328,14 @@ value ml_nlopt_set_upper_bounds (value ml_opt, value ub)
     nlopt_result res;
 
     int len = Wosize_val(ub) / Double_wosize;
-    double *b = (double *) malloc(len * sizeof(double));
+    double *b = (double *) caml_stat_alloc(len * sizeof(double));
     
     for(int i=0; i<len; i++)
 	b[i] = Double_field(ub, i);
     
     res = nlopt_set_upper_bounds(opt, b);
 
-    free(b);
+    caml_stat_free(b);
     
     return(Val_int(map_nlopt_result(res)));
 }
@@ -348,7 +347,7 @@ value ml_nlopt_get_upper_bounds (value ml_opt, value ml_b)
     
     int n = nlopt_get_dimension(opt);
     
-    double *b = (double *) malloc(n * sizeof(double));
+    double *b = (double *) caml_stat_alloc(n * sizeof(double));
     
     res = nlopt_get_upper_bounds(opt, b);
     
@@ -358,7 +357,7 @@ value ml_nlopt_get_upper_bounds (value ml_opt, value ml_b)
 	    Store_double_field(ml_b, i, b[i]);
     }
 
-    free(b);
+    caml_stat_free(b);
     
     return(Val_int(map_nlopt_result(res)));
 }
@@ -371,7 +370,7 @@ value ml_nlopt_add_inequality_constraint(value ml_opt, value ml_constr, value ml
     nlopt_opt opt = MLOPT_VAL(ml_opt).opt;
     
 
-    value *cb = (value *) malloc(sizeof(value)); // callback container
+    value *cb = (value *) caml_stat_alloc(sizeof(value)); // callback container
 
     *cb = ml_constr;
 
@@ -381,14 +380,14 @@ value ml_nlopt_add_inequality_constraint(value ml_opt, value ml_constr, value ml
     {
 	caml_register_global_root(cb);
 
-        struct constraint_list *constraints = malloc(sizeof(*constraints));
+        struct constraint_list *constraints = caml_stat_alloc(sizeof(*constraints));
         constraints->cb = cb;
         constraints->next = MLOPT_VAL(ml_opt).constraints;
 
         MLOPT_VAL(ml_opt).constraints = constraints;
     }
     else
-	free(cb);
+	caml_stat_free(cb);
     
     CAMLreturn(Val_int(map_nlopt_result(res)));
 }
@@ -401,7 +400,7 @@ value ml_nlopt_add_equality_constraint(value ml_opt, value ml_constr, value ml_t
 
     nlopt_opt opt = MLOPT_VAL(ml_opt).opt;
     
-    value *cb = (value *) malloc(sizeof(value)); // callback container
+    value *cb = (value *) caml_stat_alloc(sizeof(value)); // callback container
 
     *cb = ml_constr;
 
@@ -411,14 +410,14 @@ value ml_nlopt_add_equality_constraint(value ml_opt, value ml_constr, value ml_t
     {
 	caml_register_global_root(cb);
 
-        struct constraint_list *constraints = malloc(sizeof(*constraints));
+        struct constraint_list *constraints = caml_stat_alloc(sizeof(*constraints));
         constraints->cb = cb;
         constraints->next = MLOPT_VAL(ml_opt).constraints;
 
         MLOPT_VAL(ml_opt).constraints = constraints;
     }
     else
-	free(cb);
+	caml_stat_free(cb);
     
     CAMLreturn(Val_int(map_nlopt_result(res)));
 }
@@ -501,14 +500,14 @@ value ml_nlopt_set_xtol_abs(value ml_opt, value ml_tol)
     nlopt_result res;
 
     int n = Wosize_val(ml_tol) / Double_wosize;
-    double *tol = (double *) malloc(n * sizeof(double));
+    double *tol = (double *) caml_stat_alloc(n * sizeof(double));
 
     for(int i=0; i<n; i++)
 	tol[i] = Double_field(ml_tol, i);    
     
     res = nlopt_set_xtol_abs(opt, tol);
     
-    free(tol);
+    caml_stat_free(tol);
 
     return(Val_int(map_nlopt_result(res)));
 }
@@ -519,7 +518,7 @@ value ml_nlopt_get_xtol_abs(value ml_opt, value ml_tol)
     nlopt_result res;
 
     int n = Wosize_val(ml_tol) / Double_wosize;
-    double *tol = (double *) malloc(n * sizeof(double));
+    double *tol = (double *) caml_stat_alloc(n * sizeof(double));
 
     res = nlopt_get_xtol_abs(opt, tol);
 
@@ -527,7 +526,7 @@ value ml_nlopt_get_xtol_abs(value ml_opt, value ml_tol)
 	for(int i=0; i<n; i++)
 	    Store_double_field(ml_tol, i, tol[i]);
     
-    free(tol);
+    caml_stat_free(tol);
 
     return(Val_int(map_nlopt_result(res)));
 }
@@ -585,14 +584,14 @@ value ml_nlopt_set_initial_step(value ml_opt, value ml_dx)
     nlopt_result res;
 
     int n = Wosize_val(ml_dx) / Double_wosize;
-    double *b = (double *) malloc(n * sizeof(double));
+    double *b = (double *) caml_stat_alloc(n * sizeof(double));
     
     for(int i=0; i<n; i++)
 	b[i] = Double_field(ml_dx, i);
     
     res = nlopt_set_initial_step(opt, b);
     
-    free(b);
+    caml_stat_free(b);
     
     return(Val_int(map_nlopt_result(res)));
 }
@@ -603,8 +602,8 @@ value ml_nlopt_get_initial_step(value ml_opt, value ml_x, value ml_dx)
     nlopt_result res;
 
     int n = Wosize_val(ml_x) / Double_wosize;
-    double *x = (double *) malloc(n * sizeof(double));
-    double *dx = (double *) malloc(n * sizeof(double));
+    double *x = (double *) caml_stat_alloc(n * sizeof(double));
+    double *dx = (double *) caml_stat_alloc(n * sizeof(double));
 
     for(int i=0; i<n; i++)
 	x[i] = Double_field(ml_x, i);    
@@ -615,8 +614,8 @@ value ml_nlopt_get_initial_step(value ml_opt, value ml_x, value ml_dx)
     	for(int i=0; i<n; i++)
 	    Store_double_field(ml_dx, i, dx[i]);
     
-    free(x);
-    free(dx);
+    caml_stat_free(x);
+    caml_stat_free(dx);
 
     return(Val_int(map_nlopt_result(res)));
 }
