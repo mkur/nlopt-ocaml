@@ -86,7 +86,7 @@ static const nlopt_result map_results[] = {
     NLOPT_MAXTIME_REACHED
 };
 
-int map_nlopt_result(nlopt_result result)
+static int map_nlopt_result(nlopt_result result)
 {
     int i;
 
@@ -98,7 +98,7 @@ int map_nlopt_result(nlopt_result result)
 }
 
 
-void ml_nlopt_finalize(value ml_opt)
+static void ml_nlopt_finalize(value ml_opt)
 {
     nlopt_opt opt = (nlopt_opt) Field(ml_opt, 1);
     value *cb = (value *) Field(ml_opt, 2);
