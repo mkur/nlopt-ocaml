@@ -262,6 +262,7 @@ value ml_nlopt_optimize(value ml_opt, value ml_x)
 
     for(int i=0; i < len; i++)
 	Store_double_field(ml_xopt, i, x[i]);    
+    free(x);
     
     ml_rv = caml_alloc(3, 0);
     
