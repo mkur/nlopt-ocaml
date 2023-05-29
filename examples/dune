@@ -1,7 +1,4 @@
-(executables
-  (names
-    tutorial
-    rosenbrock
-  )
+(tests
+  (names tutorial rosenbrock)
   (libraries nlopt)
 )
