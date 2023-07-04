@@ -5,6 +5,7 @@
 
 #include <caml/alloc.h>
 #include <caml/callback.h>
+#include <caml/custom.h>
 #include <caml/mlvalues.h>
 #include <caml/memory.h>
 #include <caml/bigarray.h>
@@ -86,7 +87,7 @@ static const nlopt_result map_results[] = {
     NLOPT_MAXTIME_REACHED
 };
 
-int map_nlopt_result(nlopt_result result)
+static int map_nlopt_result(nlopt_result result)
 {
     int i;
 
@@ -97,59 +98,78 @@ int map_nlopt_result(nlopt_result result)
     return(0); // Return NLOPT_FAILURE if no mapping found (ie. when wrapper code is not consistent with nlopt) 
 }
 
+struct constraint_list {
+    value *cb;
+    struct constraint_list *next;
+};
 
-void ml_nlopt_finalize(value ml_opt)
+struct ml_opt {
+    nlopt_opt opt;
+    value *cb;
+    struct constraint_list *constraints;
+};
+
+#define MLOPT_VAL(v) (*((struct ml_opt *) Data_custom_val(v)))
+
+static void ml_nlopt_finalize(value ml_opt)
 {
-    nlopt_opt opt = (nlopt_opt) Field(ml_opt, 1);
-    value *cb = (value *) Field(ml_opt, 2);
+    nlopt_opt opt = MLOPT_VAL(ml_opt).opt;
+    value *cb = MLOPT_VAL(ml_opt).cb;
 
     // printf("Boom!\n");
 
-    nlopt_destroy(opt);
+    if (opt)
+            nlopt_destroy(opt);
     caml_remove_global_root(cb);
-    free(cb);
+    caml_stat_free(cb);
 
-    value *constraints = (value *) Field(ml_opt, 3);
-    value list = *constraints;
-    value *p;
+    struct constraint_list *constraints = MLOPT_VAL(ml_opt).constraints;
 
-    while (list != Val_emptylist)
+    while (constraints)
     {
-	p = (value *) Field(list, 0);
+        struct constraint_list *prev;
+	value *p = constraints->cb;
 	
 	// printf("Finalize %p\n", p);
 	
 	caml_remove_global_root(p);
-	free(p);
+	caml_stat_free(p);
 
-        list = Field(list, 1); 
+        prev = constraints;
+        constraints = constraints->next;
+        caml_stat_free(prev);
     }
 }
 
+
+static struct custom_operations opt_ops = {
+    "nlopt.opt",
+    ml_nlopt_finalize,
+    custom_finalize_default,
+    custom_compare_default,
+    custom_hash_default,
+    custom_serialize_default,
+    custom_deserialize_default,
+    custom_compare_ext_default,
+};
 
 value ml_nlopt_create (value algorithm, value n)
 {
     CAMLparam2(algorithm, n);
 
+    value *cb = (value *) caml_stat_alloc(sizeof(value)); // callback container
+    *cb = Val_unit;
+    caml_register_global_root(cb);
+
+    CAMLlocal1(ml_opt);
+    ml_opt = caml_alloc_custom(&opt_ops, sizeof(struct ml_opt), 1, 100);
+
     nlopt_algorithm alg = map_algorithms[Int_val(algorithm)];
     nlopt_opt opt = nlopt_create(alg, Int_val(n));
 
-    value *cb = (value *) malloc(sizeof(value)); // callback container
-    value *constraints = (value *) malloc(sizeof(value)); // list of constraints 
-
-    *cb = Val_unit;
-    *constraints = Val_emptylist;
-
-    caml_register_global_root(cb);
-    caml_register_global_root(constraints);
-
-    CAMLlocal1(ml_opt);
-
-    ml_opt = caml_alloc_final(4, &ml_nlopt_finalize , 1, 100);
-
-    Store_field(ml_opt, 1, (value) opt);
-    Store_field(ml_opt, 2, (value) cb);
-    Store_field(ml_opt, 3, (value) constraints);  
+    MLOPT_VAL(ml_opt).opt = opt;
+    MLOPT_VAL(ml_opt).cb = cb;
+    MLOPT_VAL(ml_opt).constraints = NULL;
 
     CAMLreturn(ml_opt);
 }
@@ -197,8 +217,8 @@ value ml_nlopt_set_min_objective(value ml_opt, value ml_func)
 {
     CAMLparam2(ml_opt, ml_func);
 
-    nlopt_opt opt = (nlopt_opt) Field(ml_opt, 1);
-    value *cb = (value *) Field(ml_opt, 2);
+    nlopt_opt opt = MLOPT_VAL(ml_opt).opt;
+    value *cb = MLOPT_VAL(ml_opt).cb;
     *cb = ml_func;
 
     nlopt_result res = nlopt_set_min_objective(opt, &ml_nlopt_callback_wrapper, (void *) cb);
@@ -210,8 +230,8 @@ value ml_nlopt_set_max_objective(value ml_opt, value ml_func)
 {
     CAMLparam2(ml_opt, ml_func);
 
-    nlopt_opt opt = (nlopt_opt) Field(ml_opt, 1);
-    value *cb = (value *) Field(ml_opt, 2);
+    nlopt_opt opt = MLOPT_VAL(ml_opt).opt;
+    value *cb = MLOPT_VAL(ml_opt).cb;
     *cb = ml_func;
 
     nlopt_result res = nlopt_set_max_objective(opt, &ml_nlopt_callback_wrapper, (void *) cb);
@@ -226,21 +246,22 @@ value ml_nlopt_optimize(value ml_opt, value ml_x)
     
     double fopt;
     
-    nlopt_opt opt = (nlopt_opt) Field(ml_opt, 1);
+    nlopt_opt opt = MLOPT_VAL(ml_opt).opt;
     
     int len = Wosize_val(ml_x) / Double_wosize;
     
-    double *x = (double *) malloc(len * sizeof(double));
+    ml_xopt = caml_alloc(len * Double_wosize, Double_array_tag);
+
+    double *x = (double *) caml_stat_alloc(len * sizeof(double));
     
     for(int i=0; i < len; i++)
 	x[i] = Double_field(ml_x, i);
     
     nlopt_result res = nlopt_optimize(opt, x, &fopt);
     
-    ml_xopt = caml_alloc(len * Double_wosize, Double_array_tag);
-
     for(int i=0; i < len; i++)
 	Store_double_field(ml_xopt, i, x[i]);    
+    caml_stat_free(x);
     
     ml_rv = caml_alloc(3, 0);
     
@@ -253,7 +274,7 @@ value ml_nlopt_optimize(value ml_opt, value ml_x)
 
 value ml_nlopt_get_dimension(value ml_opt)
 {
-    nlopt_opt opt = (nlopt_opt) Field(ml_opt, 1);
+    nlopt_opt opt = MLOPT_VAL(ml_opt).opt;
 
     return(Val_int(nlopt_get_dimension(opt)));
 }
@@ -262,18 +283,18 @@ value ml_nlopt_get_dimension(value ml_opt)
 
 value ml_nlopt_set_lower_bounds (value ml_opt, value lb)
 {
-    nlopt_opt opt = (nlopt_opt) Field(ml_opt, 1);
+    nlopt_opt opt = MLOPT_VAL(ml_opt).opt;
     nlopt_result res;
 
     int len = Wosize_val(lb) / Double_wosize;
-    double *b = (double *) malloc(len * sizeof(double));
+    double *b = (double *) caml_stat_alloc(len * sizeof(double));
     
     for(int i=0; i<len; i++)
 	b[i] = Double_field(lb, i);
     
     res = nlopt_set_lower_bounds(opt, b);
 
-    free(b);
+    caml_stat_free(b);
     
     return(Val_int(map_nlopt_result(res)));
 }
@@ -281,12 +302,12 @@ value ml_nlopt_set_lower_bounds (value ml_opt, value lb)
 
 value ml_nlopt_get_lower_bounds (value ml_opt, value ml_b)
 {
-    nlopt_opt opt = (nlopt_opt) Field(ml_opt, 1);
+    nlopt_opt opt = MLOPT_VAL(ml_opt).opt;
     nlopt_result res;
     
     int n = nlopt_get_dimension(opt);
     
-    double *b = (double *) malloc(n * sizeof(double));
+    double *b = (double *) caml_stat_alloc(n * sizeof(double));
     
     res = nlopt_get_lower_bounds(opt, b);
     
@@ -296,37 +317,37 @@ value ml_nlopt_get_lower_bounds (value ml_opt, value ml_b)
 	    Store_double_field(ml_b, i, b[i]);
     }
 
-    free(b);
+    caml_stat_free(b);
     
     return(Val_int(map_nlopt_result(res)));
 }
 
 value ml_nlopt_set_upper_bounds (value ml_opt, value ub)
 {
-    nlopt_opt opt = (nlopt_opt) Field(ml_opt, 1);
+    nlopt_opt opt = MLOPT_VAL(ml_opt).opt;
     nlopt_result res;
 
     int len = Wosize_val(ub) / Double_wosize;
-    double *b = (double *) malloc(len * sizeof(double));
+    double *b = (double *) caml_stat_alloc(len * sizeof(double));
     
     for(int i=0; i<len; i++)
 	b[i] = Double_field(ub, i);
     
     res = nlopt_set_upper_bounds(opt, b);
 
-    free(b);
+    caml_stat_free(b);
     
     return(Val_int(map_nlopt_result(res)));
 }
 
 value ml_nlopt_get_upper_bounds (value ml_opt, value ml_b)
 {
-    nlopt_opt opt = (nlopt_opt) Field(ml_opt, 1);
+    nlopt_opt opt = MLOPT_VAL(ml_opt).opt;
     nlopt_result res;
     
     int n = nlopt_get_dimension(opt);
     
-    double *b = (double *) malloc(n * sizeof(double));
+    double *b = (double *) caml_stat_alloc(n * sizeof(double));
     
     res = nlopt_get_upper_bounds(opt, b);
     
@@ -336,7 +357,7 @@ value ml_nlopt_get_upper_bounds (value ml_opt, value ml_b)
 	    Store_double_field(ml_b, i, b[i]);
     }
 
-    free(b);
+    caml_stat_free(b);
     
     return(Val_int(map_nlopt_result(res)));
 }
@@ -346,11 +367,10 @@ value ml_nlopt_add_inequality_constraint(value ml_opt, value ml_constr, value ml
     CAMLparam3(ml_opt, ml_constr, ml_tol);
     CAMLlocal1(cons);
 
-    nlopt_opt opt = (nlopt_opt) Field(ml_opt, 1);
+    nlopt_opt opt = MLOPT_VAL(ml_opt).opt;
     
-    value *constraints = (value *) Field(ml_opt, 3);
 
-    value *cb = (value *) malloc(sizeof(value)); // callback container
+    value *cb = (value *) caml_stat_alloc(sizeof(value)); // callback container
 
     *cb = ml_constr;
 
@@ -360,15 +380,14 @@ value ml_nlopt_add_inequality_constraint(value ml_opt, value ml_constr, value ml
     {
 	caml_register_global_root(cb);
 
-	cons = caml_alloc(2, 0);
+        struct constraint_list *constraints = caml_stat_alloc(sizeof(*constraints));
+        constraints->cb = cb;
+        constraints->next = MLOPT_VAL(ml_opt).constraints;
 
-	Store_field(cons, 0, (value) cb);     /* Head */
-	Store_field(cons, 1, *constraints);   /* Tail */
-	
-	*constraints = cons;
+        MLOPT_VAL(ml_opt).constraints = constraints;
     }
     else
-	free(cb);
+	caml_stat_free(cb);
     
     CAMLreturn(Val_int(map_nlopt_result(res)));
 }
@@ -379,11 +398,9 @@ value ml_nlopt_add_equality_constraint(value ml_opt, value ml_constr, value ml_t
     CAMLparam3(ml_opt, ml_constr, ml_tol);
     CAMLlocal1(cons);
 
-    nlopt_opt opt = (nlopt_opt) Field(ml_opt, 1);
+    nlopt_opt opt = MLOPT_VAL(ml_opt).opt;
     
-    value *constraints = (value *) Field(ml_opt, 3);
-
-    value *cb = (value *) malloc(sizeof(value)); // callback container
+    value *cb = (value *) caml_stat_alloc(sizeof(value)); // callback container
 
     *cb = ml_constr;
 
@@ -393,15 +410,14 @@ value ml_nlopt_add_equality_constraint(value ml_opt, value ml_constr, value ml_t
     {
 	caml_register_global_root(cb);
 
-	cons = caml_alloc(2, 0);
+        struct constraint_list *constraints = caml_stat_alloc(sizeof(*constraints));
+        constraints->cb = cb;
+        constraints->next = MLOPT_VAL(ml_opt).constraints;
 
-	Store_field(cons, 0, (value) cb);     /* Head */
-	Store_field(cons, 1, *constraints);   /* Tail */
-	
-	*constraints = cons;
+        MLOPT_VAL(ml_opt).constraints = constraints;
     }
     else
-	free(cb);
+	caml_stat_free(cb);
     
     CAMLreturn(Val_int(map_nlopt_result(res)));
 }
@@ -410,7 +426,7 @@ value ml_nlopt_add_equality_constraint(value ml_opt, value ml_constr, value ml_t
 
 value ml_nlopt_set_stopval(value ml_opt, value stopval)
 {
-    nlopt_opt opt = (nlopt_opt) Field(ml_opt, 1);
+    nlopt_opt opt = MLOPT_VAL(ml_opt).opt;
     nlopt_result res;
 
     res = nlopt_set_stopval(opt, Double_val(stopval));
@@ -420,7 +436,7 @@ value ml_nlopt_set_stopval(value ml_opt, value stopval)
 
 value ml_nlopt_get_stopval(value ml_opt)
 {
-    nlopt_opt opt = (nlopt_opt) Field(ml_opt, 1);
+    nlopt_opt opt = MLOPT_VAL(ml_opt).opt;
 
     return(caml_copy_double(nlopt_get_stopval(opt)));
 }
@@ -428,7 +444,7 @@ value ml_nlopt_get_stopval(value ml_opt)
 
 value ml_nlopt_set_ftol_rel(value ml_opt, value ml_tol)
 {
-    nlopt_opt opt = (nlopt_opt) Field(ml_opt, 1);
+    nlopt_opt opt = MLOPT_VAL(ml_opt).opt;
     nlopt_result res;
 
     res = nlopt_set_ftol_rel(opt, Double_val(ml_tol));
@@ -438,7 +454,7 @@ value ml_nlopt_set_ftol_rel(value ml_opt, value ml_tol)
 
 value ml_nlopt_get_ftol_rel(value ml_opt)
 {
-    nlopt_opt opt = (nlopt_opt) Field(ml_opt, 1);
+    nlopt_opt opt = MLOPT_VAL(ml_opt).opt;
 
     return(caml_copy_double(nlopt_get_ftol_rel(opt)));
 }
@@ -446,7 +462,7 @@ value ml_nlopt_get_ftol_rel(value ml_opt)
 
 value ml_nlopt_set_ftol_abs(value ml_opt, value ml_tol)
 {
-    nlopt_opt opt = (nlopt_opt) Field(ml_opt, 1);
+    nlopt_opt opt = MLOPT_VAL(ml_opt).opt;
     nlopt_result res;
 
     res = nlopt_set_ftol_abs(opt, Double_val(ml_tol));
@@ -456,14 +472,14 @@ value ml_nlopt_set_ftol_abs(value ml_opt, value ml_tol)
 
 value ml_nlopt_get_ftol_abs(value ml_opt)
 {
-    nlopt_opt opt = (nlopt_opt) Field(ml_opt, 1);
+    nlopt_opt opt = MLOPT_VAL(ml_opt).opt;
 
     return(caml_copy_double(nlopt_get_ftol_abs(opt)));
 }
 
 value ml_nlopt_set_xtol_rel(value ml_opt, value ml_tol)
 {
-    nlopt_opt opt = (nlopt_opt) Field(ml_opt, 1);
+    nlopt_opt opt = MLOPT_VAL(ml_opt).opt;
     nlopt_result res;
 
     res = nlopt_set_xtol_rel(opt, Double_val(ml_tol));
@@ -473,36 +489,36 @@ value ml_nlopt_set_xtol_rel(value ml_opt, value ml_tol)
 
 value ml_nlopt_get_xtol_rel(value ml_opt)
 {
-    nlopt_opt opt = (nlopt_opt) Field(ml_opt, 1);
+    nlopt_opt opt = MLOPT_VAL(ml_opt).opt;
 
     return(caml_copy_double(nlopt_get_xtol_rel(opt)));
 }
 
 value ml_nlopt_set_xtol_abs(value ml_opt, value ml_tol)
 {
-    nlopt_opt opt = (nlopt_opt) Field(ml_opt, 1);
+    nlopt_opt opt = MLOPT_VAL(ml_opt).opt;
     nlopt_result res;
 
     int n = Wosize_val(ml_tol) / Double_wosize;
-    double *tol = (double *) malloc(n * sizeof(double));
+    double *tol = (double *) caml_stat_alloc(n * sizeof(double));
 
     for(int i=0; i<n; i++)
 	tol[i] = Double_field(ml_tol, i);    
     
     res = nlopt_set_xtol_abs(opt, tol);
     
-    free(tol);
+    caml_stat_free(tol);
 
     return(Val_int(map_nlopt_result(res)));
 }
 
 value ml_nlopt_get_xtol_abs(value ml_opt, value ml_tol)
 {
-    nlopt_opt opt = (nlopt_opt) Field(ml_opt, 1);
+    nlopt_opt opt = MLOPT_VAL(ml_opt).opt;
     nlopt_result res;
 
     int n = Wosize_val(ml_tol) / Double_wosize;
-    double *tol = (double *) malloc(n * sizeof(double));
+    double *tol = (double *) caml_stat_alloc(n * sizeof(double));
 
     res = nlopt_get_xtol_abs(opt, tol);
 
@@ -510,7 +526,7 @@ value ml_nlopt_get_xtol_abs(value ml_opt, value ml_tol)
 	for(int i=0; i<n; i++)
 	    Store_double_field(ml_tol, i, tol[i]);
     
-    free(tol);
+    caml_stat_free(tol);
 
     return(Val_int(map_nlopt_result(res)));
 }
@@ -518,7 +534,7 @@ value ml_nlopt_get_xtol_abs(value ml_opt, value ml_tol)
 
 value ml_nlopt_set_maxeval(value ml_opt, value ml_maxeval)
 {
-    nlopt_opt opt = (nlopt_opt) Field(ml_opt, 1);
+    nlopt_opt opt = MLOPT_VAL(ml_opt).opt;
     nlopt_result res;
 
     res = nlopt_set_maxeval(opt, Int_val(ml_maxeval));
@@ -528,14 +544,14 @@ value ml_nlopt_set_maxeval(value ml_opt, value ml_maxeval)
 
 value ml_nlopt_get_maxeval(value ml_opt)
 {
-    nlopt_opt opt = (nlopt_opt) Field(ml_opt, 1);
+    nlopt_opt opt = MLOPT_VAL(ml_opt).opt;
 
     return(Val_int(nlopt_get_maxeval(opt)));
 }
 
 value ml_nlopt_set_maxtime(value ml_opt, value ml_maxtime)
 {
-    nlopt_opt opt = (nlopt_opt) Field(ml_opt, 1);
+    nlopt_opt opt = MLOPT_VAL(ml_opt).opt;
     nlopt_result res;
 
     res = nlopt_set_maxtime(opt, Double_val(ml_maxtime));
@@ -545,14 +561,14 @@ value ml_nlopt_set_maxtime(value ml_opt, value ml_maxtime)
 
 value ml_nlopt_get_maxtime(value ml_opt)
 {
-    nlopt_opt opt = (nlopt_opt) Field(ml_opt, 1);
+    nlopt_opt opt = MLOPT_VAL(ml_opt).opt;
 
     return(caml_copy_double(nlopt_get_maxtime(opt)));
 }
 
 value ml_nlopt_force_stop(value ml_opt)
 {
-    nlopt_opt opt = (nlopt_opt) Field(ml_opt, 1);
+    nlopt_opt opt = MLOPT_VAL(ml_opt).opt;
     nlopt_result res;
 
     res = nlopt_force_stop(opt);
@@ -564,30 +580,30 @@ value ml_nlopt_force_stop(value ml_opt)
 
 value ml_nlopt_set_initial_step(value ml_opt, value ml_dx)
 {
-    nlopt_opt opt = (nlopt_opt) Field(ml_opt, 1);
+    nlopt_opt opt = MLOPT_VAL(ml_opt).opt;
     nlopt_result res;
 
     int n = Wosize_val(ml_dx) / Double_wosize;
-    double *b = (double *) malloc(n * sizeof(double));
+    double *b = (double *) caml_stat_alloc(n * sizeof(double));
     
     for(int i=0; i<n; i++)
 	b[i] = Double_field(ml_dx, i);
     
     res = nlopt_set_initial_step(opt, b);
     
-    free(b);
+    caml_stat_free(b);
     
     return(Val_int(map_nlopt_result(res)));
 }
 
 value ml_nlopt_get_initial_step(value ml_opt, value ml_x, value ml_dx)
 {
-    nlopt_opt opt = (nlopt_opt) Field(ml_opt, 1);
+    nlopt_opt opt = MLOPT_VAL(ml_opt).opt;
     nlopt_result res;
 
     int n = Wosize_val(ml_x) / Double_wosize;
-    double *x = (double *) malloc(n * sizeof(double));
-    double *dx = (double *) malloc(n * sizeof(double));
+    double *x = (double *) caml_stat_alloc(n * sizeof(double));
+    double *dx = (double *) caml_stat_alloc(n * sizeof(double));
 
     for(int i=0; i<n; i++)
 	x[i] = Double_field(ml_x, i);    
@@ -598,8 +614,8 @@ value ml_nlopt_get_initial_step(value ml_opt, value ml_x, value ml_dx)
     	for(int i=0; i<n; i++)
 	    Store_double_field(ml_dx, i, dx[i]);
     
-    free(x);
-    free(dx);
+    caml_stat_free(x);
+    caml_stat_free(dx);
 
     return(Val_int(map_nlopt_result(res)));
 }
@@ -608,8 +624,8 @@ value ml_nlopt_get_initial_step(value ml_opt, value ml_x, value ml_dx)
 
 value ml_nlopt_set_local_optimizer(value ml_opt, value ml_local_opt)
 {
-    nlopt_opt opt = (nlopt_opt) Field(ml_opt, 1);
-    nlopt_opt local_opt = (nlopt_opt) Field(ml_local_opt, 1);
+    nlopt_opt opt = MLOPT_VAL(ml_opt).opt;
+    nlopt_opt local_opt = MLOPT_VAL(ml_local_opt).opt;
     nlopt_result res;
 
     res = nlopt_set_local_optimizer(opt, local_opt);
@@ -621,7 +637,7 @@ value ml_nlopt_set_local_optimizer(value ml_opt, value ml_local_opt)
 
 value ml_nlopt_set_population(value ml_opt, value ml_pop)
 {
-    nlopt_opt opt = (nlopt_opt) Field(ml_opt, 1);
+    nlopt_opt opt = MLOPT_VAL(ml_opt).opt;
     nlopt_result res;
 
     res = nlopt_set_population(opt, (unsigned) Int_val(ml_pop));
@@ -634,7 +650,7 @@ value ml_nlopt_set_population(value ml_opt, value ml_pop)
 
 value ml_nlopt_set_vector_storage(value ml_opt, value ml_M)
 {
-    nlopt_opt opt = (nlopt_opt) Field(ml_opt, 1);
+    nlopt_opt opt = MLOPT_VAL(ml_opt).opt;
     nlopt_result res;
 
     res = nlopt_set_vector_storage(opt, (unsigned) Int_val(ml_M));
@@ -644,7 +660,7 @@ value ml_nlopt_set_vector_storage(value ml_opt, value ml_M)
 
 value ml_nlopt_get_vector_storage(value ml_opt)
 {
-    nlopt_opt opt = (nlopt_opt) Field(ml_opt, 1);
+    nlopt_opt opt = MLOPT_VAL(ml_opt).opt;
 
     return(Val_int(nlopt_get_vector_storage(opt)));
 }
