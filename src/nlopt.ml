@@ -12,7 +12,6 @@ type [@warning "-37"] nlopt_algorithm =
   | NLOPT_GN_ORIG_DIRECT_L
   | NLOPT_GD_STOGO
   | NLOPT_GD_STOGO_RAND
-  | NLOPT_LD_LBFGS_NOCEDAL
   | NLOPT_LD_LBFGS
   | NLOPT_LN_PRAXIS
   | NLOPT_LD_VAR1
@@ -43,6 +42,9 @@ type [@warning "-37"] nlopt_algorithm =
   | NLOPT_G_MLSL
   | NLOPT_G_MLSL_LDS
   | NLOPT_LD_SLSQP
+  | NLOPT_LD_CCSAQ
+  | NLOPT_GN_ESCH
+  | NLOPT_GN_AGS
 
 type 'a algorithm = nlopt_algorithm
 
@@ -56,7 +58,6 @@ let orig_direct = NLOPT_GN_ORIG_DIRECT
 let orig_direct_l = NLOPT_GN_ORIG_DIRECT_L
 let stogo = NLOPT_GD_STOGO
 let stogo_rand = NLOPT_GD_STOGO_RAND
-let lbfgs_nocedal = NLOPT_LD_LBFGS_NOCEDAL
 let lbfgs = NLOPT_LD_LBFGS
 let praxis = NLOPT_LN_PRAXIS
 let var1 = NLOPT_LD_VAR1
@@ -79,6 +80,9 @@ let auglag_eq = NLOPT_AUGLAG_EQ
 let mlsl = NLOPT_G_MLSL
 let mlsl_lds = NLOPT_G_MLSL_LDS
 let slsqp = NLOPT_LD_SLSQP
+let ccsaq = NLOPT_LD_CCSAQ
+let esch = NLOPT_GN_ESCH
+let ags = NLOPT_GN_AGS
 
 type 'a t
 

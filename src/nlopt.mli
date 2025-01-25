@@ -14,7 +14,6 @@ val orig_direct : [`Global | `Ineq] algorithm
 val orig_direct_l : [`Global] algorithm
 val stogo : [`Global | `Grad] algorithm
 val stogo_rand : [`Global | `Grad] algorithm
-val lbfgs_nocedal : [`Local | `Grad] algorithm
 val lbfgs : [`Local | `Grad] algorithm
 val praxis : [`Local] algorithm
 val var1 : [`Local | `Grad] algorithm
@@ -37,6 +36,9 @@ val auglag_eq : [`Subsidiary | `Ineq | `Eq] algorithm
 val mlsl : [`Subsidiary | `Global] algorithm
 val mlsl_lds : [`Subsidiary | `Global] algorithm
 val slsqp : [`Local | `Grad | `Ineq | `Eq] algorithm
+val esch : [`Global] algorithm
+val ccsaq : [`Local | `Grad] algorithm
+val ags : [`Global] algorithm
 
 type 'a t
 (** A value containing the information about the optimization problem. *)
