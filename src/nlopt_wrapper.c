@@ -25,7 +25,7 @@ static const nlopt_algorithm map_algorithms[] = {
     NLOPT_GD_STOGO,
     NLOPT_GD_STOGO_RAND,
 
-    NLOPT_LD_LBFGS_NOCEDAL,
+    //NLOPT_LD_LBFGS_NOCEDAL,
     
     NLOPT_LD_LBFGS,
     
@@ -70,7 +70,13 @@ static const nlopt_algorithm map_algorithms[] = {
     NLOPT_G_MLSL,
     NLOPT_G_MLSL_LDS,
     
-    NLOPT_LD_SLSQP
+    NLOPT_LD_SLSQP,
+   
+    NLOPT_LD_CCSAQ,
+
+    NLOPT_GN_ESCH,
+
+    NLOPT_GN_AGS
 };
 
 static const nlopt_result map_results[] = {
